@@ -1,0 +1,38 @@
+# vLLM server config for Qwen3-VL-32B-Thinking (AWQ-INT4) on RTX 5090 (Text-only mode)
+# This file is loaded by `vllm serve --config /workspace/config.yaml`
+
+# ---- Model & server ----
+model: "cpatonn/Qwen3-VL-32B-Thinking-AWQ-4bit"
+trust-remote-code: true
+host: "0.0.0.0"
+port: 8000
+
+# ---- Reasoning (Qwen3) ----
+enable-reasoning: true
+reasoning-parser: "qwen3"
+
+# ---- Context / concurrency ----
+# Should fit on 32GB VRAM- 18,000 tokens total (prompt + output).
+max-model-len: 18000
+max-num-seqs: 1
+
+# ---- GPU / memory ----
+# Leaves safe headroom on a 5090 for KV growth + fragmentation.
+gpu-memory-utilization: 0.92
+
+# ---- Defaults source + overrides ----
+# Use vLLM's built-ins, then replace with our overrides below.
+generation-config: "vllm"
+
+# vLLM expects a JSON string here (not a YAML map).
+# We set a one-shot, reasoning-friendly default; clients can still override.
+override-generation-config: >
+  {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "repetition_penalty": 1.0,
+    "presence_penalty": 1.5,
+    "frequency_penalty": 0.0,
+    "max_new_tokens": 2048
+  }
