@@ -8,8 +8,8 @@ host: "0.0.0.0"
 port: 8000
 
 # ---- Reasoning (Qwen3) ----
-enable-reasoning: true
 reasoning-parser: "qwen3"
+served-model-name: "Qwen3-VL-32B-Thinking-AWQ-4bit"
 
 # ---- Context / concurrency ----
 # Should fit on 32GB VRAM- 18,000 tokens total (prompt + output).

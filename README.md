@@ -53,7 +53,7 @@ With this exact combo, **Qwen3-VL-32B-Thinking (AWQ-INT4)** runs **in 4-bit quan
    ./run_vllm.sh
    ```
 
-3. **Test the endpoint:**
+3) **Test the endpoint** (should list `Qwen3-VL-32B-Thinking-AWQ-4bit`):
    ```bash
    # From the host:
    curl -s http://172.17.0.1:8000/v1/models | jq .
