@@ -40,9 +40,13 @@ docker create \
   -v "${HF_CACHE}:/root/.cache/huggingface" \
   -e "HUGGING_FACE_HUB_TOKEN=${HF_TOKEN:-}" \
   "${IMAGE}" \
-  vllm serve --config /workspace/config.yaml \
-    --limit-mm-per-prompt.image 0 \
-    --limit-mm-per-prompt.video 0
+  # NOTE (2025-10-29): There is no newer NVIDIA NGC vLLM container yet that bundles
+  # a Transformers version new enough for Qwen3-VL (needs >=4.57.0). We do an
+  # in-container pip upgrade to the latest stable (4.57.1) before starting vLLM.
+  bash -lc "pip install --no-cache-dir -U 'transformers==4.57.1' && \
+            vllm serve --config /workspace/config.yaml \
+              --limit-mm-per-prompt.image 0 \
+              --limit-mm-per-prompt.video 0"
 
 echo "Starting ${NAME} ..."
 docker start -a "${NAME}"
