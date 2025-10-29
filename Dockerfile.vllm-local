@@ -1,0 +1,47 @@
+# Base: NVIDIA PyTorch 25.09
+# Why: Matches Ubuntu 24.04, CUDA 13.0.1, and PyTorch 2.9 preview from NVIDIA.
+# This aligns with your RTX 5090 + driver 580 setup and avoids the older CUDA 12.8 stacks.
+FROM nvcr.io/nvidia/pytorch:25.09-py3
+
+# System tools for building Python CUDA/C++ extensions:
+# - git: to fetch vLLM source
+# - build-essential, ninja-build: to compile native/CPP/CUDA parts fast and reliably
+# - python3-dev: headers for native Python builds
+RUN apt-get update && apt-get install -y \
+    git build-essential ninja-build python3-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+# Keep pip modern to avoid old wheel resolution behavior
+RUN python3 -m pip install --upgrade pip wheel
+
+# Qwen3-VL needs new Transformers; accelerate/xformers are common runtime deps.
+# Versions:
+# - transformers >= 4.57.0: required for Qwen3-VL model families
+# - accelerate >= 1.0.0: execution helpers used by HF ecosystem
+# - xformers >= 0.0.29: optional fused ops often beneficial with vLLM/HF
+RUN pip install "transformers>=4.57.0" "accelerate>=1.0.0" "xformers>=0.0.29"
+
+# Install vLLM from source, pinned to a stable release tag.
+# Why source: vLLM prebuilt wheels bundle CUDA 12.8 bits; Blackwell + CUDA 13 needs a local build.
+# TORCH_CUDA_ARCH_LIST includes sm_120 generation so kernels are built for RTX 5090.
+# VLLM_BUILD_WITH_CUDA=1 ensures CUDA extensions are compiled.
+RUN git clone --branch v0.11.0 --depth 1 https://github.com/vllm-project/vllm /opt/vllm && \
+    TORCH_CUDA_ARCH_LIST="12.0;12.1" \
+    VLLM_BUILD_WITH_CUDA=1 \
+    pip install -e /opt/vllm
+
+# Health print at build time (does not block runtime)
+RUN python - <<'PY'
+import torch
+print("Torch:", torch.__version__, "CUDA:", torch.version.cuda, "Cap:", (torch.cuda.get_device_capability() if torch.cuda.is_available() else None))
+PY
+
+# Expose the same port as NVIDIA vLLM image; we keep entrypoint minimal because your
+# run_vllm.sh will pass "vllm serve --config ..." and flags unchanged.
+EXPOSE 8000
+
+# No ENTRYPOINT that launches the server automatically; we mirror NGC behavior where
+# the "vllm" command is available and the caller provides the subcommand and flags.
+# The container will accept:
+#   ... <image> vllm serve --config /workspace/config.yaml --limit-mm-per-prompt.image 0 --limit-mm-per-prompt.video 0
+CMD ["/bin/bash", "-lc", "vllm --help >/dev/null 2>&1 || python -c 'import vllm' >/dev/null 2>&1; sleep infinity"]

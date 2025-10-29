@@ -3,17 +3,23 @@
 Stop and remove the persistent container:
 
 ```bash
-docker stop qwen3_vllm || true
-docker rm qwen3_vllm || true
+docker stop qwen3_vllm
+docker rm qwen3_vllm
 ```
 
-Optionally delete the image (re-downloads next install):
+Delete the local image (rebuilds on next run):
 
 ```bash
-docker rmi nvcr.io/nvidia/vllm:25.10-py3
+docker rmi local/vllm:25.09-py3
 ```
 
-Optional cache cleanup (removes downloaded weights):
+Optional Docker build cache cleanup:
+
+```bash
+docker builder prune -f
+```
+
+Optional Hugging Face cache cleanup (removes downloaded weights):
 
 ```bash
 rm -rf ~/.cache/huggingface/hub/*

@@ -4,7 +4,9 @@ set -Eeuo pipefail
 # Create a persistent vLLM container for Qwen3-VL-32B-Thinking (AWQ-INT4).
 # Not a system service; just a normal docker container you can start/stop.
 
-IMAGE="nvcr.io/nvidia/vllm:25.10-py3"
+# Use our local NGC-style vLLM image. This allows us to use newer vLLM
+# and transformer versions than what Nvidia provides.
+IMAGE="local/vllm:25.09-py3"
 NAME="qwen3_vllm"
 PORT="8000"             # container port (OpenAI-compatible API)
 # Bind to docker port, so that it's accessible by OpenWebUI docker instance
@@ -13,8 +15,17 @@ BIND="172.17.0.1"
 CONFIG="$(pwd)/config.yaml"
 HF_CACHE="${HOME}/.cache/huggingface"
 
-echo "Pulling image ${IMAGE} ..."
-docker pull "${IMAGE}"
+# Require the local image to exist; do NOT auto-build.
+if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
+  echo "ERROR: Docker image '${IMAGE}' not found."
+  echo "Build it first, then rerun this script:"
+  echo "  ./build_local.sh"
+  echo "If you want to use a different image, edit IMAGE= in this script."
+  exit 1
+fi
+
+# No implicit pulls for local images.
+echo "Using existing image '${IMAGE}'."
 
 echo "Ensuring cache and config exist ..."
 mkdir -p "${HF_CACHE}"
