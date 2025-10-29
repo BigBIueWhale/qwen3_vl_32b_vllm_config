@@ -61,7 +61,6 @@ With this exact combo, **Qwen3-VL-32B-Thinking (AWQ-INT4)** runs **in 4-bit quan
 3. **Install / create the server container** (one time):
 
    ```bash
-   chmod +x ./run_vllm.sh
    ./run_vllm.sh
    ```
 
