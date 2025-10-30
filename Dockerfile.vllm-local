@@ -30,6 +30,15 @@ RUN git clone --branch v0.11.0 --depth 1 https://github.com/vllm-project/vllm /o
     VLLM_BUILD_WITH_CUDA=1 \
     pip install -e /opt/vllm
 
+# Triton for torch.compile on CUDA 13 (PyTorch 2.9 timeframe)
+RUN python3 -m pip install --upgrade "triton==3.5.0"
+
+# FlashInfer 0.3.1 (validated with vLLM 0.11.x)
+RUN apt-get update && apt-get install -y cmake && rm -rf /var/lib/apt/lists/* && \
+    git clone --branch v0.3.1 --depth 1 https://github.com/flashinfer-ai/flashinfer /opt/flashinfer && \
+    cd /opt/flashinfer && \
+    python3 -m pip install -v .
+
 # Health print at build time (does not block runtime)
 RUN python - <<'PY'
 import torch
