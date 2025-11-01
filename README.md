@@ -1,6 +1,6 @@
-> Note: I gave up on this project and the config described here never got to a working stage.
+> Note: I gave up on this project and the config described here never got to a working stage.\
 > Thankfully, llama.cpp+Ollama projects now support Qwen3-VL!
-> These are [my recommended parameters](https://github.com/BigBIueWhale/deep_intent_search/blob/e9a6d22e042e7d1b20d401062dee04d8695daad8/core/llm.py#L197-L255).
+> These are [my recommended parameters](https://github.com/BigBIueWhale/deep_intent_search/blob/e9a6d22e042e7d1b20d401062dee04d8695daad8/core/llm.py#L197-L255).\
 > A stable Nvidia docker image for `vLLM` that supports Qwen3-VL **and** Nvidia RTX 5090 (blackwell) **and** host CUDA 13.0 was just not available yet when I tried to get this project working.
 
 # qwen3_vl_32b_vllm_config
